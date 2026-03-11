@@ -99,4 +99,4 @@ class CosineComparer:
                 return similarity >= sharpness, similarity
                 
             case _:
-                raise ValueError(f"mode is {mode}, should be 0, 1, or 'both'!")
+                raise ValueError(f"mode is {mode}, should be 0, 1, or 2")
