@@ -13,6 +13,11 @@ def recursive_subfact(num: int) -> int:
         num: Non-negative integer for which to compute the subfactorial.
     Returns:
         The subfactorial !n as an integer.
+        
+    Warning:
+        This function has exponential time complexity O(2^n) and is provided
+        primarily for educational purposes to demonstrate the canonical definition.
+        For practical use, prefer `subfact()` which runs in O(n) time.
     """
     match num:
         case 0:
