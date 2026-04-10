@@ -1,3 +1,4 @@
+
 def recursive_subfact(num: int) -> int:
     """
     Compute the subfactorial (derangement number) using canonical recursion.
