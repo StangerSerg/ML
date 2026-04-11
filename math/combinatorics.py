@@ -228,7 +228,7 @@ def permutation(
 
     res = factorial(num - fixed + 1) * factorial(fixed)
     
-    if together:
+    if not together:
         res = factorial(num) - res
 
     return res
