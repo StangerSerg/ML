@@ -161,7 +161,7 @@ def euler(precision: int) -> float:
 
 
 def permutation(
-    num: int, 
+    items: int, 
     linked: int = 0, 
     together: bool = True
 ) -> int:
@@ -177,9 +177,9 @@ def permutation(
        elements are NOT allowed to be together
     
     Args:
-        num: Total number of elements (n).
+        items: Total number of elements (n).
         linked: Number of specific elements to treat as a group or exclude.
-               Must be between 0 and num inclusive.
+               Must be between 0 and items inclusive.
         together: 
             - True (default): Calculate permutations where 'linked' elements are grouped together
             - False: Calculate permutations where 'linked' elements are NOT together
@@ -188,7 +188,7 @@ def permutation(
         Number of valid permutations as integer.
     
     Raises:
-        ValueError: If validation fails (invalid num/linked values or missing together flag).
+        ValueError: If validation fails (invalid items/linked values).
         TypeError: If arguments have incorrect types.
     
     Examples:
@@ -213,8 +213,8 @@ def permutation(
         0    # 3! - 6 = 0 (all elements together always)
     """   
     # Валидация типа num
-    if not isinstance(num, int):
-        raise TypeError(f"Expected integer for 'num', got {type(num).__name__}")
+    if not isinstance(items, int):
+        raise TypeError(f"Expected integer for 'items', got {type(items).__name__}")
     
     # Валидация типа linked
     if not isinstance(linked, int):
@@ -225,24 +225,24 @@ def permutation(
         raise TypeError(f"Expected boolean for 'together', got {type(together).__name__}")
     
     # Валидация диапазонов
-    if num < 0:
-        raise ValueError(f"'num' cannot be negative, got {num}")
+    if items < 0:
+        raise ValueError(f"'items' cannot be negative, got {items}")
     
     if linked < 0:
         raise ValueError(f"'linked' cannot be negative, got {linked}")
     
-    if linked > num:
-        raise ValueError(f"'linked' ({linked}) cannot be greater than 'num' ({num})")
+    if linked > items:
+        raise ValueError(f"'linked' ({linked}) cannot be greater than 'items' ({items})")
 
-    res = factorial(num - linked + 1) * factorial(linked)
+    res = factorial(items - linked + 1) * factorial(linked)
     
     if linked > 0 and not together:
-        res = factorial(num) - res
+        res = factorial(items) - res
 
     return res
 
 
-def derangement(num: int) -> int:
+def derangement(items: int) -> int:
     """
     Alias for subfactorial function.
     
@@ -250,14 +250,14 @@ def derangement(num: int) -> int:
     no element appears in its original position.
     
     Args:
-        num: Non-negative integer for which to compute the number of derangements.
+        items: Non-negative integer for which to compute the number of derangements.
     
     Returns:
         The number of derangements !n as an integer.
     
     Raises:
-        ValueError: If num is negative.
-        TypeError: If num is not an integer.
+        ValueError: If items is negative.
+        TypeError: If items is not an integer.
     
     Examples:
         >>> derangement(3)
@@ -267,10 +267,10 @@ def derangement(num: int) -> int:
         >>> derangement(5)
         44
     """
-    return subfact(num)
+    return subfact(items)
     
 
-def arrangement(power: int, num: int) -> int:
+def arrangement(power: int, items: int) -> int:
     """
     Calculate the number of arrangements (permutations) of n elements taken k at a time.
     
@@ -282,7 +282,7 @@ def arrangement(power: int, num: int) -> int:
     
     Args:
         power: Total number of elements available (n). Must be non-negative.
-        num: Number of elements to arrange (k). Must satisfy 0 <= k <= n.
+        items: Number of elements to arrange (k). Must satisfy 0 <= k <= n.
     
     Returns:
         Number of possible arrangements as an integer.
@@ -290,7 +290,6 @@ def arrangement(power: int, num: int) -> int:
     Raises:
         ValueError: If validation fails (negative values or k > n).
         TypeError: If arguments are not integers.
-        ZeroDivisionError: If power == num (handled by factorial(0) = 1).
     
     Examples:
         # Number of ways to arrange 2 elements from a set of 5
@@ -322,19 +321,99 @@ def arrangement(power: int, num: int) -> int:
     if not isinstance(power, int):
         raise TypeError(f"Expected integer for 'power', got {type(power).__name__}")
     
-    if not isinstance(num, int):
-        raise TypeError(f"Expected integer for 'num', got {type(num).__name__}")
+    if not isinstance(items, int):
+        raise TypeError(f"Expected integer for 'items', got {type(items).__name__}")
     
     # Валидация диапазонов
     if power < 0:
         raise ValueError(f"'power' cannot be negative, got {power}")
     
-    if num < 0:
-        raise ValueError(f"'num' cannot be negative, got {num}")
+    if items < 0:
+        raise ValueError(f"'items' cannot be negative, got {items}")
     
-    if num > power:
-        raise ValueError(f"'num' ({num}) cannot be greater than 'power' ({power})")
+    if items > power:
+        raise ValueError(f"'items' ({items}) cannot be greater than 'power' ({power})")
     
     # Вычисление размещений
     # Используем целочисленное деление, так как результат всегда целый
-    return factorial(power) // factorial(power - num)
+    return factorial(power) // factorial(power - items)
+
+
+def combinations(power: int, items: int) -> int:
+    """
+    Calculate the number of combinations (binomial coefficient) of n elements taken k at a time.
+    
+    Also known as "n choose k" or binomial coefficient C(n, k).
+    The formula is: C(n, k) = n! / (k! * (n - k)!)
+    
+    This represents the number of ways to choose k distinct elements from a set
+    of n elements, where order does NOT matter.
+    
+    Args:
+        power: Total number of elements available (n). Must be non-negative.
+        items: Number of elements to choose (k). Must satisfy 0 <= k <= n.
+    
+    Returns:
+        Number of possible combinations as an integer.
+    
+    Raises:
+        ValueError: If validation fails (negative values or k > n).
+        TypeError: If arguments are not integers.
+    
+    Examples:
+        # Number of ways to choose 2 items from a set of 5
+        >>> combinations(5, 2)
+        10  # C(5,2) = 5! / (2! * 3!) = 120 / (2 * 6) = 10
+        
+        # Choose all items (only 1 way)
+        >>> combinations(5, 5)
+        1   # C(5,5) = 1
+        
+        # Choose 0 items (only 1 way)
+        >>> combinations(5, 0)
+        1   # C(5,0) = 1
+        
+        # Choose 1 item (n ways)
+        >>> combinations(5, 1)
+        5   # C(5,1) = 5
+        
+        # Symmetry property: C(5,2) = C(5,3)
+        >>> combinations(5, 3)
+        10  # C(5,3) = C(5,2) = 10
+        
+        # Edge cases
+        >>> combinations(0, 0)
+        1   # C(0,0) = 1
+        >>> combinations(3, 2)
+        3   # C(3,2) = 3
+        
+    Notes:
+        - Also known as: binomial coefficient, nCk, C(n,k)
+        - Result is always an integer
+        - Symmetry property: C(n, k) = C(n, n-k)
+        - For k > n, result is 0 (invalid selection)
+        - For k = 0 or k = n, result is 1
+        - For k = 1 or k = n-1, result is n
+    """
+    # Валидация типов
+    if not isinstance(power, int):
+        raise TypeError(f"Expected integer for 'power', got {type(power).__name__}")
+    
+    if not isinstance(items, int):
+        raise TypeError(f"Expected integer for 'items', got {type(items).__name__}")
+    
+    # Валидация диапазонов
+    if power < 0:
+        raise ValueError(f"'power' cannot be negative, got {power}")
+    
+    if items < 0:
+        raise ValueError(f"'items' cannot be negative, got {items}")
+    
+    if items > power:
+        raise ValueError(f"'items' ({items}) cannot be greater than 'power' ({power})")
+
+    num = min(items, (power - items))
+
+    # Вычисление сочетаний
+    # Используем целочисленное деление, так как результат всегда целый
+    return arrangement(power, num) // permutation(num)
