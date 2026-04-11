@@ -162,31 +162,33 @@ def euler(precision: int) -> float:
 
 def permutation(
     num: int, 
-    fixed: int = 0, 
+    linked: int = 0, 
     together: bool = True
 ) -> int:
     """
     Calculate permutations of n elements with optional grouping constraints.
     
-    This function handles two scenarios:
-    1. When 'together' is True: Treat 'fixed' elements as a single block
-       (calculates permutations with grouped items)
-    2. When 'together' is False: Calculate permutations where 'fixed' specific
+    This function handles three scenarios:
+    1. When 'linked' = 0: No constraints, simply calculate all permutations
+       (equivalent to factorial(num))
+    2. When 'together' is True: Treat 'linked' specific elements as a single block
+       (calculates permutations where these elements must stay together)    
+    3. When 'together' is False: Calculate permutations where 'linked' specific
        elements are NOT allowed to be together
     
     Args:
         num: Total number of elements (n).
-        fixed: Number of specific elements to treat as a group or exclude.
+        linked: Number of specific elements to treat as a group or exclude.
                Must be between 0 and num inclusive.
         together: 
-            - True (default): Calculate permutations where 'fixed' elements are grouped together
-            - False: Calculate permutations where 'fixed' elements are NOT together
+            - True (default): Calculate permutations where 'linked' elements are grouped together
+            - False: Calculate permutations where 'linked' elements are NOT together
     
     Returns:
         Number of valid permutations as integer.
     
     Raises:
-        ValueError: If validation fails (invalid num/fixed values or missing together flag).
+        ValueError: If validation fails (invalid num/linked values or missing together flag).
         TypeError: If arguments have incorrect types.
     
     Examples:
@@ -198,37 +200,43 @@ def permutation(
         >>> permutation(5, 2, together=False)
         72  # 5! - 48 = 120 - 48 = 72
         
-        # With fixed=0, group of 0 elements (trivial cases)
-        >>> permutation(3, 0, together=True)
-        6   # (3)! * 0! = 6
-        >>> permutation(3, 0, together=False)
-        0   # 3! - 3! = 0
-    """
+        # Edge cases
+        >>> permutation(3, 0)
+        6    # 3! = 6
+        >>> permutation(3, 1, together=True)
+        6    # (3-1+1)! * 1! = 3! * 1 = 6 (single element as a block)
+        >>> permutation(3, 1, together=False)
+        0    # 3! - 6 = 0 (single element cannot be "not together" with itself)
+        >>> permutation(3, 3, together=True)
+        6    # (3-3+1)! * 3! = 1! * 6 = 6 (all elements as one block)
+        >>> permutation(3, 3, together=False)
+        0    # 3! - 6 = 0 (all elements together always)
+    """   
     # Валидация типа num
     if not isinstance(num, int):
         raise TypeError(f"Expected integer for 'num', got {type(num).__name__}")
     
-    # Валидация типа fixed
-    if not isinstance(fixed, int):
-        raise TypeError(f"Expected integer for 'fixed', got {type(fixed).__name__}")
+    # Валидация типа linked
+    if not isinstance(linked, int):
+        raise TypeError(f"Expected integer for 'linked', got {type(linked).__name__}")
     
     # Валидация типа together
-    if together is not None and not isinstance(together, bool):
+    if not isinstance(together, bool):
         raise TypeError(f"Expected boolean for 'together', got {type(together).__name__}")
     
     # Валидация диапазонов
     if num < 0:
         raise ValueError(f"'num' cannot be negative, got {num}")
     
-    if fixed < 0:
-        raise ValueError(f"'fixed' cannot be negative, got {fixed}")
+    if linked < 0:
+        raise ValueError(f"'linked' cannot be negative, got {linked}")
     
-    if fixed > num:
-        raise ValueError(f"'fixed' ({fixed}) cannot be greater than 'num' ({num})")
+    if linked > num:
+        raise ValueError(f"'linked' ({linked}) cannot be greater than 'num' ({num})")
 
-    res = factorial(num - fixed + 1) * factorial(fixed)
+    res = factorial(num - linked + 1) * factorial(linked)
     
-    if not together:
+    if linked > 0 and not together:
         res = factorial(num) - res
 
     return res
@@ -260,3 +268,73 @@ def derangement(num: int) -> int:
         44
     """
     return subfact(num)
+    
+
+def arrangement(power: int, num: int) -> int:
+    """
+    Calculate the number of arrangements (permutations) of n elements taken k at a time.
+    
+    Also known as partial permutations or k-permutations of n.
+    The formula is: A(n, k) = n! / (n - k)!
+    
+    This represents the number of ways to choose and arrange k distinct elements
+    from a set of n elements, where order matters.
+    
+    Args:
+        power: Total number of elements available (n). Must be non-negative.
+        num: Number of elements to arrange (k). Must satisfy 0 <= k <= n.
+    
+    Returns:
+        Number of possible arrangements as an integer.
+    
+    Raises:
+        ValueError: If validation fails (negative values or k > n).
+        TypeError: If arguments are not integers.
+        ZeroDivisionError: If power == num (handled by factorial(0) = 1).
+    
+    Examples:
+        # Number of ways to arrange 2 elements from a set of 5
+        >>> arrangement(5, 2)
+        20  # 5! / 3! = 120 / 6 = 20
+        
+        # Arrange all 5 elements (regular permutation)
+        >>> arrangement(5, 5)
+        120  # 5! / 0! = 120 / 1 = 120
+        
+        # Arrange 0 elements (empty arrangement)
+        >>> arrangement(5, 0)
+        1    # 5! / 5! = 1
+        
+        # Edge cases
+        >>> arrangement(3, 1)
+        3    # 3! / 2! = 6 / 2 = 3
+        >>> arrangement(0, 0)
+        1    # 0! / 0! = 1
+        
+    Notes:
+        - Also known as: falling factorial, P(n, k), nPk
+        - Result is always an integer (factorials divide evenly)
+        - For k > n, result is 0 (invalid selection)
+        - For k = n, result equals factorial(n)
+        - For k = 0, result is 1 (empty arrangement)
+    """
+    # Валидация типов
+    if not isinstance(power, int):
+        raise TypeError(f"Expected integer for 'power', got {type(power).__name__}")
+    
+    if not isinstance(num, int):
+        raise TypeError(f"Expected integer for 'num', got {type(num).__name__}")
+    
+    # Валидация диапазонов
+    if power < 0:
+        raise ValueError(f"'power' cannot be negative, got {power}")
+    
+    if num < 0:
+        raise ValueError(f"'num' cannot be negative, got {num}")
+    
+    if num > power:
+        raise ValueError(f"'num' ({num}) cannot be greater than 'power' ({power})")
+    
+    # Вычисление размещений
+    # Используем целочисленное деление, так как результат всегда целый
+    return factorial(power) // factorial(power - num)
